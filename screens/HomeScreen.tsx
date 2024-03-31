@@ -3,13 +3,20 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import { Feather, AntDesign } from '@expo/vector-icons';
 import ButtonIcon from "../components/ButtonIcon";
 import * as ImagePicker from 'expo-image-picker';
+import { RootStackParamList } from "../navigation/AppNavigator";
+import { NavigationProp } from "@react-navigation/native";
 
 interface props {
-    
+    navigation: NavigationProp<RootStackParamList>
 }
 
-const HomeScreen : FC <props> = () : JSX.Element => {
+const HomeScreen : FC <props> = ({ navigation }) : JSX.Element => {
     const [image,setImage] = useState<string| null>(null);
+    const navigateToImageEditor = (uri : string) : void => {
+        navigation.navigate('ImageEditor',{
+            imageUri: uri
+        })
+    }
     const takeImage = async () : Promise<void>=> {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
@@ -25,6 +32,7 @@ const HomeScreen : FC <props> = () : JSX.Element => {
             // console.log(result);
             if (!result.canceled) {
                 setImage(result.assets[0].uri);
+                navigateToImageEditor(result.assets[0].uri)
             }
         }
 
@@ -42,6 +50,7 @@ const HomeScreen : FC <props> = () : JSX.Element => {
     
         if (!result.canceled) {
           setImage(result.assets[0].uri);
+          navigateToImageEditor(result.assets[0].uri)
         }
       };
     return (
@@ -68,7 +77,6 @@ const HomeScreen : FC <props> = () : JSX.Element => {
                 buttonText='Select'
                 onPress={pickImage}
             />
-            {image && <Image source={{ uri: image }} style={styles.image} />}
         </View>
     )
 }
@@ -92,9 +100,5 @@ const  styles = StyleSheet.create({
     },
     secondaryTitle: {
         fontSize:18
-    },
-    image: {
-        width: 200,
-        height: 200,
     }
 })

@@ -1,11 +1,24 @@
-import { StatusBar } from 'expo-status-bar';
+import 'react-native-gesture-handler';
 import React, { FC } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import HomeScreen from './screens/HomeScreen';
+import { StyleSheet, Text, View, useColorScheme } from 'react-native';
+import { NavigationContainer, DarkTheme, DefaultTheme, Theme } from '@react-navigation/native';
+import AppNavigator from './navigation/AppNavigator';
+
+const currentTheme : Theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    card: '#6C9ADE'
+  }
+}
+
+
 
 const App : FC = () : JSX.Element | null=> {
   return  (
-    <HomeScreen/>
+    <NavigationContainer theme={currentTheme}>
+      <AppNavigator/>
+    </NavigationContainer>
   )
 }
 
