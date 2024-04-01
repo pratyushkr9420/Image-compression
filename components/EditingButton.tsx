@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import { Pressable, Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { AntDesign, Feather } from '@expo/vector-icons';
 interface props {
     family: string,
@@ -12,11 +12,11 @@ interface props {
 
 const EditingButton : FC <props>  = ({ family, title, name, size, iconColor, onPress }) => {
     return (
-        <Pressable style={styles.btnContainer} onPress={onPress}>
+        <TouchableOpacity style={styles.btnContainer} onPress={onPress}>
             {family === 'feather' && <Feather name={name as any} size={size} color={iconColor} />}
             {family === 'ant-design' && <AntDesign name={name as any} size={size} color={iconColor} />}
             <Text style={styles.btnLabel}>{title}</Text>
-        </Pressable>
+        </TouchableOpacity>
     )
 }
 
