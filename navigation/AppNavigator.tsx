@@ -6,7 +6,7 @@ import ImageEditorScreen from "../screens/ImageEditorScreen";
 
 export type RootStackParamList = {
     Home: undefined,
-    ImageEditor: { imageUri : string}
+    ImageEditor: {imageUri : string}
 }
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -14,11 +14,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const AppNavigator = () => {
     return (
         <Stack.Navigator initialRouteName="Home" screenOptions={{
-            headerTitleStyle:{
-                fontWeight:'bold',
-                color:'white',
-                fontSize:25
-            }
+            headerShown:false
         }}>
             <Stack.Screen name="Home" component={HomeScreen}/>
             <Stack.Screen name="ImageEditor" component={ImageEditorScreen}/>

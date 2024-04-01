@@ -5,13 +5,14 @@ import ButtonIcon from "../components/ButtonIcon";
 import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { NavigationProp } from "@react-navigation/native";
+import { StackScreenProps } from "@react-navigation/stack";
 
-interface props {
-    navigation: NavigationProp<RootStackParamList>
+
+type props = {
+    navigation:NavigationProp<RootStackParamList>
 }
 
 const HomeScreen : FC <props> = ({ navigation }) : JSX.Element => {
-    const [image,setImage] = useState<string| null>(null);
     const navigateToImageEditor = (uri : string) : void => {
         navigation.navigate('ImageEditor',{
             imageUri: uri
@@ -31,7 +32,6 @@ const HomeScreen : FC <props> = ({ navigation }) : JSX.Element => {
             });
             // console.log(result);
             if (!result.canceled) {
-                setImage(result.assets[0].uri);
                 navigateToImageEditor(result.assets[0].uri)
             }
         }
@@ -49,7 +49,6 @@ const HomeScreen : FC <props> = ({ navigation }) : JSX.Element => {
         // console.log(result);
     
         if (!result.canceled) {
-          setImage(result.assets[0].uri);
           navigateToImageEditor(result.assets[0].uri)
         }
       };

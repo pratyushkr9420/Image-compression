@@ -8,7 +8,7 @@ const currentTheme : Theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    card: '#6C9ADE'
+    card: '#e1e4e8'
   }
 }
 
