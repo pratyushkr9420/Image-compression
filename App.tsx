@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, useColorScheme } from 'react-native';
 import { NavigationContainer, DarkTheme, DefaultTheme, Theme } from '@react-navigation/native';
 import AppNavigator from './navigation/AppNavigator';
 
+
 const currentTheme : Theme = {
   ...DefaultTheme,
   colors: {

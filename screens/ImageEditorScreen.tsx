@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from "react";
-import { View, Text, StyleSheet, Image, Alert, Modal, Button } from "react-native";
+import { View, Text, StyleSheet, Image, Modal, Button, Alert } from "react-native";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -7,7 +7,8 @@ import * as ImagePicker from 'expo-image-picker';
 import UtilityButtons from "../utils/UtilityButton";
 import EditorTools from "../components/EditorTools";
 import * as FileSystem from 'expo-file-system';
-
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as MediaLibrary from 'expo-media-library';
 
 type RouteProps = StackScreenProps<RootStackParamList, 'ImageEditor'>;
 
@@ -21,12 +22,37 @@ const ImageEditorScreen : FC <props> = ({ route, navigation }) => {
     const [selectedImage,setSelectedImage] = useState<string>('');
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [fileSize,setFileSize] = useState<number>(0);
+    const [compressionValue, setCompressionValue] = useState<number>(0);
+
+    async function requestPermissions() {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Sorry, we need media library permissions to make this work!');
+        }
+      }
+
+      
     const homeNav = () => {
         navigation.goBack();
     }
+
     useEffect(() => {
         getFileSize(route.params.imageUri)
+        requestPermissions();
     },[])
+
+    const manipulateImage = async (compressionValue: number) : Promise<void>=> {
+        const processedImage = await ImageManipulator.manipulateAsync(
+            selectedImage || route.params.imageUri,
+            [{ resize: {height: 265, width: 206}}],
+            {compress: compressionValue, format: ImageManipulator.SaveFormat.JPEG}
+        )
+        const asset = await MediaLibrary.createAssetAsync(processedImage.uri);
+        await MediaLibrary.createAlbumAsync('Image-compression', asset, false);
+        Alert.alert('File successfully saved to library')
+        homeNav();
+    }
+
     const getFileSize = async (uri : string) : Promise<void> => {
         try{
             const result = await FileSystem.getInfoAsync(uri);
@@ -39,6 +65,7 @@ const ImageEditorScreen : FC <props> = ({ route, navigation }) => {
             console.error("Error getting file info: ", error);
         }
     }
+
     const captureImage = async () : Promise<void>=> {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
@@ -58,6 +85,7 @@ const ImageEditorScreen : FC <props> = ({ route, navigation }) => {
         }
 
     };
+
     const getGalleryImage = async () : Promise<void>=> {
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -74,13 +102,15 @@ const ImageEditorScreen : FC <props> = ({ route, navigation }) => {
         <View style={{...styles.container,backgroundColor: '#e1e4e8'}}>
             <View style={styles.imageEditorHeader}>
                 <UtilityButtons.back onPress={() => setModalVisible(true)}/>
-                <UtilityButtons.download onPress={() => getFileSize(selectedImage || route.params.imageUri )}/>
+                <UtilityButtons.download onPress={() => manipulateImage(compressionValue)}/>
             </View>
             <Image source={{ uri: selectedImage || route.params.imageUri }} style={styles.image} />
             <EditorTools
                 captureImage={captureImage}
                 getGalleryImage={getGalleryImage}
                 imageSize={fileSize}
+                compressionValue={compressionValue}
+                setCompressionValue={setCompressionValue}
             />
             <Modal
                 animationType="slide"
