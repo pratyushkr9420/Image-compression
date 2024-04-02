@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
         justifyContent:'space-between',
         alignItems:'center',
         backgroundColor: '#6C9ADE',
-        padding:10
+        padding:5
     },
     btnLabel: {
         textAlign:'center',

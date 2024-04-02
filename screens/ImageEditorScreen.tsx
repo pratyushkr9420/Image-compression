@@ -1,11 +1,13 @@
-import React, { FC, useState } from "react";
-import { View, Text, StyleSheet, Image, ImageBackground} from "react-native";
+import React, { FC, useEffect, useState } from "react";
+import { View, Text, StyleSheet, Image, Alert, Modal, Button } from "react-native";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { StackScreenProps } from "@react-navigation/stack";
 import * as ImagePicker from 'expo-image-picker';
 import UtilityButtons from "../utils/UtilityButton";
 import EditorTools from "../components/EditorTools";
+import * as FileSystem from 'expo-file-system';
+
 
 type RouteProps = StackScreenProps<RootStackParamList, 'ImageEditor'>;
 
@@ -17,8 +19,25 @@ interface props {
 
 const ImageEditorScreen : FC <props> = ({ route, navigation }) => {
     const [selectedImage,setSelectedImage] = useState<string>('');
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [fileSize,setFileSize] = useState<number>(0);
     const homeNav = () => {
         navigation.goBack();
+    }
+    useEffect(() => {
+        getFileSize(route.params.imageUri)
+    },[])
+    const getFileSize = async (uri : string) : Promise<void> => {
+        try{
+            const result = await FileSystem.getInfoAsync(uri);
+            if(result.exists){
+                const sizeInMb = result.size/1048576
+                setFileSize(Number(sizeInMb.toPrecision(2)))
+            }
+        }
+        catch(error){
+            console.error("Error getting file info: ", error);
+        }
     }
     const captureImage = async () : Promise<void>=> {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -34,12 +53,12 @@ const ImageEditorScreen : FC <props> = ({ route, navigation }) => {
             });
             if (!result.canceled) {
                 setSelectedImage(result.assets[0].uri)
+                getFileSize(selectedImage || route.params.imageUri)
             }
         }
 
     };
     const getGalleryImage = async () : Promise<void>=> {
-        // No permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.All,
           allowsEditing: true,
@@ -48,19 +67,46 @@ const ImageEditorScreen : FC <props> = ({ route, navigation }) => {
         });
         if (!result.canceled) {
             setSelectedImage(result.assets[0].uri)
+            getFileSize(selectedImage || route.params.imageUri)
         }
       };
     return (
         <View style={{...styles.container,backgroundColor: '#e1e4e8'}}>
             <View style={styles.imageEditorHeader}>
-                <UtilityButtons.back onPress={homeNav}/>
-                <UtilityButtons.download/>
+                <UtilityButtons.back onPress={() => setModalVisible(true)}/>
+                <UtilityButtons.download onPress={() => getFileSize(selectedImage || route.params.imageUri )}/>
             </View>
             <Image source={{ uri: selectedImage || route.params.imageUri }} style={styles.image} />
             <EditorTools
                 captureImage={captureImage}
                 getGalleryImage={getGalleryImage}
+                imageSize={fileSize}
             />
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+            >
+                <View style={styles.modalViewContainer}>
+                    <View style={styles.modal}>
+                        <View>
+                            <Text style={styles.modalTitle}>Are you sure you want to go back</Text>
+                        </View>
+                        <View style={styles.modalButtonContainer}>
+                            <Button
+                                title="Yes"
+                                color='black'
+                                onPress={homeNav}
+                            />
+                            <Button
+                                title="No"
+                                color='black'
+                                onPress={() => {setModalVisible(false)}}
+                            />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     )
 }
@@ -87,5 +133,29 @@ const styles = StyleSheet.create({
         height: 265,
         position:'absolute',
         top:250
+    },
+    modalViewContainer: {
+        flex: 1,
+        justifyContent:"center",
+        alignItems:'center',
+        backgroundColor: "black",
+        borderRadius:5,
+        opacity:0.9
+    },
+    modal: {
+        backgroundColor: 'white',
+        padding: 5,
+        borderRadius:10,
+        opacity:1.1
+    },
+    modalTitle: {
+        color: '#3c81c9',
+        fontWeight: 'bold',
+        fontSize:20
+    },
+    modalButtonContainer: {
+        flexDirection:'row',
+        justifyContent:'space-around',
+        marginVertical: 10
     }
 })

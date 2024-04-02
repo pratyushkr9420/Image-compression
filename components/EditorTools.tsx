@@ -5,10 +5,12 @@ import Slider from "@react-native-community/slider";
 
 type editortoolsprop = {
     captureImage: () => void
-    getGalleryImage: () => void
+    getGalleryImage: () => void,
+    compressionValue?: number,
+    imageSize?:number
 }
 
-const EditorTools : FC <editortoolsprop>  = ({ captureImage, getGalleryImage}) : JSX.Element => {
+const EditorTools : FC <editortoolsprop>  = ({ captureImage, getGalleryImage, imageSize}) : JSX.Element => {
     return (
         <View style={styles.editingToolContainer}>
             <View style={styles.editingBtnContainer}>
@@ -31,7 +33,7 @@ const EditorTools : FC <editortoolsprop>  = ({ captureImage, getGalleryImage}) :
             </View>
             <View style={styles.infoContainer}>
                 <Text>Compressed to: 50%</Text>
-                <Text>Image size: 50KB</Text>
+                <Text>Image size: {imageSize}mb</Text>
             </View>
             <View style={{justifyContent: "center",alignItems: 'center'}}>
                 <Slider
